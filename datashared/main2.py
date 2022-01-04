@@ -1,9 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy as np
 
 from pyspark.context import SparkContext
 from pyspark.sql.session import SparkSession
-from pyspark.sql import SQLContext
 from pyspark import SparkConf
 
 conf = SparkConf()
@@ -15,7 +15,7 @@ sc.setLogLevel("WARN")
 
 spark = SparkSession(sc)
 
-movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs://master:9000/data/220kmovies.csv")
+movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs://master:9000/data/6kmovies.csv")
 
 certRDD = movieDF.select("certificate").filter(movieDF.certificate != '').rdd
 certPairRDD = certRDD.flatMap(lambda x: x).map(lambda x: (x, 1)).reduceByKey(lambda x,y: x+y).sortBy(lambda x: x[1], ascending=False)

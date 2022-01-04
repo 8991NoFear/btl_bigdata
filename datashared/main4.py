@@ -1,10 +1,11 @@
+
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import figure
 import matplotlib.pyplot as plt
-import numpy as np
 
 from pyspark.context import SparkContext
 from pyspark.sql.session import SparkSession
-from pyspark.sql import SQLContext
 from pyspark import SparkConf
 
 conf = SparkConf()
@@ -15,7 +16,7 @@ sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 
 spark = SparkSession(sc)
-movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs:///dataset/dataset02/220kmovies.csv")
+movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs://master:9000/data/6kmovies.csv")
 
 yearRDD = movieDF.select("year").filter(movieDF.year != '').rdd
 yearPairRDD = yearRDD.flatMap(lambda x: x).filter(lambda x: x.isnumeric()).map(lambda x: (x, 1))

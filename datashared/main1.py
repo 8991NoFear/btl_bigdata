@@ -1,20 +1,10 @@
-# import numpy as np
-# import os
-# import matplotlib.pyplot as plt
-# packages = "org.apache.spark:spark-sql_2.12:3.0.1"
-# os.environ["PYSPARK_SUBMIT_ARGS"] = (
-# "--packages {0} pyspark-shell".format(packages)
-# )
-
-# import matplotlib
-# matplotlib.use('TkAgg') # apt install python3-tk
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.pyplot import figure
 import matplotlib.pyplot as plt
-import numpy as np
 
 from pyspark.context import SparkContext
 from pyspark.sql.session import SparkSession
-from pyspark.sql import SQLContext
 from pyspark import SparkConf
 
 conf = SparkConf()
@@ -26,7 +16,7 @@ sc.setLogLevel("WARN")
 
 spark = SparkSession(sc)
 
-movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs:///dataset/dataset02/220kmovies.csv")
+movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs://master:9000/data/6kmovies.csv")
 
 directorRDD = movieDF.select("director").filter(movieDF.director != '').rdd
 directorRDD = directorRDD.flatMap(lambda x: x)

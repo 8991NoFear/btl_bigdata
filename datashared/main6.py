@@ -1,10 +1,10 @@
-from matplotlib.pyplot import figure
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
 from pyspark.context import SparkContext
 from pyspark.sql.session import SparkSession
-from pyspark.sql import SQLContext
 from pyspark import SparkConf
 
 conf = SparkConf()
@@ -15,7 +15,7 @@ sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 
 spark = SparkSession(sc)
-movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs:///dataset/dataset02/220kmovies.csv")
+movieDF = spark.read.format("csv").option("header", "true").option("encoding", "UTF-8").load("hdfs://master:9000/data/6kmovies.csv")
 
 genreRDD = movieDF.select("genre").filter(movieDF.genre != '').rdd
 totalFilm = genreRDD.count()

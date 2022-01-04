@@ -1,71 +1,78 @@
-version: '3.7'
-networks: 
-    spark_cluster:
-        ipam: 
-            config: 
-                - subnet: 172.16.0.0/16
+version: '3.8'
+
+networks:
+  spark_cluster:
+    ipam:
+      config: 
+        - subnet: 172.16.0.0/16
 services:
-    spark_m:
-        container_name: spark_m
-        image: spark_common:v4
-        hostname: master
-        ports:
-            - 4040:4040     # view jobs
-            - 6066:6066     # submit jobs
-            - 7077:7077     # spark master
-            - 8080:8080     # master web-ui
-            - 8081:8081     # slave web-ui 
-            - 8888:8888     # zeppelin
-            - 9870:9870     # hadoop web-ui
-        # xem file conf/zeppelin-env.sh de biet them chi tiet
-        environment:
-            SPARK_MASTER: spark://master:7077
-            ZEPPELIN_ADDR: 0.0.0.0
-            ZEPPELIN_PORT: 8888
-            PYSPARK_PYTHON: /usr/bin/python3
-            PYTHONPATH: /usr/bin/python3
-            SPARK_WORKER_CORES: 1
-            SPARK_WORKER_MEMORY: 2G
-            SPARK_DRIVER_MEMORY: 512m
-            SPARK_EXECUTOR_MEMORY: 512m
-        networks:
-            spark_cluster:
-                ipv4_address: 172.16.0.100
-        # An entry with the ip address and hostname is created in /etc/hosts inside containers
-        extra_hosts:
-            - "worker1:172.16.0.111" 
-            - "worker2:172.16.0.112"
-        volumes: 
-            - ./datashared:/datashared
-        tty: true 
-        restart: "always"
+  master:
+    build:
+      context: ./
+      dockerfile: spark_common.Dockerfile
+    image: spark_common:v1
+    container_name: master
+    hostname: master
+    ports:
+      - 4040:4040 # view jobs
+      - 6066:6066 # submit jobs
+      - 7077:7077 # spark master
+      - 8080:8080 # master web-ui
+      - 8081:8081 # slave web-ui 
+      - 8888:8888 # zeppelin
+      - 9870:9870 # hadoop web-ui
+    environment:
+      SPARK_MASTER: spark://master:7077
+      PYSPARK_PYTHON: /usr/bin/python3
+      PYTHONPATH: /usr/bin/python3
+      SPARK_WORKER_CORES: 1
+      SPARK_WORKER_MEMORY: 2G
+      SPARK_DRIVER_MEMORY: 512m
+      SPARK_EXECUTOR_MEMORY: 512m
+    networks:
+      spark_cluster:
+        ipv4_address: 172.16.0.100
+    # An entry with the ip address and hostname is created in /etc/hosts inside containers
+    extra_hosts: 
+      - "worker01:172.16.0.111"
+      - "worker02:172.16.0.112"
+    volumes:
+      - ./datashared:/datashared
+    tty: true
+    restart: "always"
 
-    spark_w1:
-        container_name: spark_w1
-        image: spark_common:v4
-        hostname: worker1
-        environment:
-            SPARK_MASTER: spark://master:7077
-        networks:
-            spark_cluster: 
-                ipv4_address: 172.16.0.111
-        extra_hosts:
-            - "master:172.16.0.100"
-            - "worker2:172.16.0.112"
-        tty: true
-        restart: "always"
+  worker01:
+      build:
+        context: ./
+        dockerfile: spark_common.Dockerfile
+      image: spark_common:v1
+      container_name: worker01
+      hostname: worker01
+      environment:
+        SPARK_MASTER: spark://master:7077
+      networks: 
+        spark_cluster: 
+          ipv4_address: 172.16.0.111
+      extra_hosts:
+        - "master:172.16.0.100"
+        - "worker02:172.16.0.112"
+      tty: true
+      restart: "always"
 
-    spark_w2:
-        container_name: spark_w2
-        image: spark_common:v4
-        hostname: worker2
-        environment: 
-            SPARK_MASTER: spark://master:7077
-        networks:
-            spark_cluster: 
-                ipv4_address: 172.16.0.112
-        extra_hosts:
-            - "master:172.16.0.100"
-            - "worker1:172.16.0.111"
-        tty: true
-        restart: "always"
+  worker02: 
+      build:
+        context: ./
+        dockerfile: spark_common.Dockerfile
+      image: spark_common:v1
+      container_name: worker02
+      hostname: worker02
+      environment:
+        SPARK_MASTER: spark://master:7077
+      networks: 
+        spark_cluster: 
+          ipv4_address: 172.16.0.112
+      extra_hosts:
+        - "master:172.16.0.100"
+        - "worker01:172.16.0.111"
+      tty: true
+      restart: "always"
