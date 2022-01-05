@@ -8,7 +8,11 @@ RUN apt install scala -y
 
 RUN apt install python3 -y
 
-RUN apt install python3-matplotlib -y
+RUN apt install python3-pip -y
+
+RUN python3 -m pip install -U pip
+
+RUN python3 -m pip install -U matplotlib
 
 RUN apt install ssh openssh-server -y
 
